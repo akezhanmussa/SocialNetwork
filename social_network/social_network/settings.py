@@ -9,6 +9,8 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
+    'posts.apps.PostsConfig',
+    'authentication.apps.AuthenticationConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -50,12 +52,14 @@ WSGI_APPLICATION = 'social_network.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'xlkfadod',
-        'USER': 'xlkfadod',
-        'PASSWORD': 'EKgFeqOrAKHaOFsYIdO50vvFxntb2gsm',
+        'NAME': 'wqnjusgc',
+        'USER': 'wqnjusgc',
+        'PASSWORD': 'IIoS7HxpFkwSu1683vGUYHX2UpKCOdJE',
         'HOST': 'ella.db.elephantsql.com',
     }
 }
+
+AUTH_USER_MODEL = 'authentication.User'
 
 AUTH_PASSWORD_VALIDATORS = [
     {

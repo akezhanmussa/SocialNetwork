@@ -16,7 +16,7 @@ update:
 	$(PYTHON) -m pip install -U -r requirements.txt
 
 runserver:
-	$(PYTHON) $(SRC_DIR)/manage.py runserver
+	$(SRC_DIR)/manage.py runserver
 
 shell:
-	$(PYTHON) $(SRC_DIR)/manage.py shell
+	$(SRC_DIR)/manage.py shell
