@@ -5,6 +5,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from . import serializers
 from . import renderer
+from . import models
+import datetime
 
 
 class SignUpView(APIView):
@@ -18,7 +20,6 @@ class SignUpView(APIView):
         if user is None:
             raise ValidationError(
                 detail='user must not be empty',
-                code=status.HTTP_400_BAD_REQUEST,
             )
 
         user_serializer = self.serializer_class(data=user)
@@ -34,16 +35,20 @@ class LoginView(APIView):
     serializer_class = serializers.LoginSerializer
 
     def post(self, request):
-        user = request.data.get('user', None)
+        user_data = request.data.get('user', None)
 
-        if user is None:
-            detail = 'user must not be empty, please '\
-                     'provide username and password'
+        if user_data is None:
+            detail = (
+                'user must not be empty, please '
+                'provide username and password'
+            )
             raise ValidationError(
                 detail=detail,
-                code=status.HTTP_400_BAD_REQUEST,
             )
 
-        user_serializer = self.serializer_class(data=user)
+        user_serializer = self.serializer_class(data=user_data)
         user_serializer.is_valid(raise_exception=True)
+        user = models.User.objects.get(username=user_serializer.validated_data['username'])
+        user.last_login = datetime.datetime.now()
+        user.save()
         return Response(user_serializer.data, status=status.HTTP_200_OK)

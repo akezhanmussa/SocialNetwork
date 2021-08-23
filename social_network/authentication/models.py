@@ -38,8 +38,7 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=255, unique=True)
     email = models.EmailField(unique=True)
-    last_request_at = models.DateTimeField(blank=True, null=True)
-    last_login_at = models.DateTimeField(blank=True, null=True)
+    last_request = models.DateTimeField(blank=True, null=True)
     is_staff = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'username'

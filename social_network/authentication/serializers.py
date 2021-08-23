@@ -56,7 +56,7 @@ class LoginSerializer(serializers.ModelSerializer):
                 'password is required for login',
             )
 
-        user = authenticate(username=username, password=password)
+        user: models.User = authenticate(username=username, password=password)
 
         if user is None:
             raise serializers.ValidationError(
