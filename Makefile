@@ -18,5 +18,11 @@ update:
 runserver:
 	$(SRC_DIR)/manage.py runserver
 
+migrate:
+	$(SRC_DIR)/manage.py migrate
+
+makemigrations:
+	$(SRC_DIR)/manage.py makemigrations
+
 shell:
 	$(SRC_DIR)/manage.py shell
