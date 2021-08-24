@@ -1,45 +1,74 @@
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
-from rest_framework.exceptions import ValidationError
-from rest_framework.response import Response
-from rest_framework import status
+import datetime
+import authentication.models
+from . import serializers
+from . import constants
 from . import models
-import enum
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
+from rest_framework import status
 
 
-class PostOperation(str, enum.Enum):
-    LIKE = 'like'
-    UNLIKE = 'unlike'
+class PostView(APIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = serializers.PostSerializer
+
+    def get(self, request):
+        post_data = request.data.get('post', None)
+        post_serializer = self.serializer_class(data=post_data)
+        post_serializer.is_valid(raise_exception=True)
+        return Response(post_serializer.validated_data, status=status.HTTP_200_OK)
 
 
 class PostOperationView(APIView):
     permission_classes = (IsAuthenticated,)
+    serializer_class = serializers.PostOperationSerializer
 
     def post(self, request):
-        user = request.user
-        post_id = request.data.get('id', None)
-        post_operation = request.data.get('operation', None)
+        user: authentication.models.User = request.user
+        post_operation_serializer = self.serializer_class(data=request.data)
+        post_operation_serializer.is_valid(raise_exception=True)
+        post = post_operation_serializer.validated_data['post']
+        now = datetime.datetime.now()
 
-        if post_id is None:
-            raise ValidationError(
-                'post id must not be empty',
-            )
+        if post_operation_serializer.validated_data['operation'] == constants.PostOperation.LIKE:
+            post.likes.add(user, through_defaults={'date': now})
+        else:
+            post.likes.remove(user)
 
-        if post_operation is None:
+        # Save time when the current user made the last request to the service.
+        user.last_request = now
+        user.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class PostAnalyticsView(APIView):
+    permission_classes = (IsAuthenticated,)
+    date_format = "%Y-%m-%d"
+
+    def get(self, request):
+        date_from_str = request.query_params.get('date_from', None)
+        date_to_str = request.query_params.get('date_to', None)
+
+        if date_from_str is None or date_to_str is None:
             raise ValidationError(
-                f'post operation must not be empty or be other than '
-                f'possible choices: {[e for e in PostOperation]}'
+                'provide query parameters'
             )
 
         try:
-            post = models.Post.objects.get(pk=int(post_id))
-            if post_operation == PostOperation.LIKE:
-                post.likes.add(user)
-            else:
-                post.likes.remove(user)
-        except models.Post.DoesNotExist as e:
+            date_from = datetime.datetime.strptime(date_from_str, self.date_format)
+            date_to = datetime.datetime.strptime(date_to_str, self.date_format)
+            likes_num = models.PostLike.objects.filter(date__gte=date_from).filter(date__lte=date_to).count()
+            return Response(
+                {
+                    'likes_num': likes_num,
+                },
+                status=status.HTTP_200_OK,
+            )
+        except (ValueError, TypeError):
             raise ValidationError(
-                'post with given id does not exist',
-            ) from e
-
-        return Response(status=status.HTTP_204_NO_CONTENT)
+                f'provided query parametrs are invalid,'
+                f'make sure that both "date_from" and '
+                f'"date_to" follow format: {self.date_format}',
+            )

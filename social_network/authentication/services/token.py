@@ -24,11 +24,13 @@ def generate_jwt_token(user_info: dict, life_span: datetime.timedelta, secret_ke
 
 
 def decode_jwt_token(token: str, secret_key: str = settings.SECRET_KEY, algorithms : tuple = ('HS256')):
-    print(secret_key)
     try:
         return jwt.decode(token, secret_key, algorithms=algorithms)
     except jwt.DecodeError as e:
-        print(e)
         raise TokenOperationException(
-            f'Could not decode token {token}'
+            f'Could not decode token'
+        ) from e
+    except jwt.ExpiredSignatureError as e:
+        raise TokenOperationException(
+            f'Token has expired'
         ) from e
