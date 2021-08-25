@@ -7,7 +7,7 @@ _SERVER_URL = 'http://127.0.0.1:8000'
 
 
 class Client:
-    def __init__(self, username='bot', password='Akezhan98'):
+    def __init__(self, username, password):
         self.username = username
         self.password = password
 
