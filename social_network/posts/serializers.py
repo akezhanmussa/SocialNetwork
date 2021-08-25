@@ -1,7 +1,7 @@
-from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 from . import models
 from . import constants
+from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -25,6 +25,12 @@ class PostSerializer(serializers.ModelSerializer):
             raise ValidationError(
                 f'post with id {post_id} does not exist',
             )
+
+
+class PostCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Post
+        fields = ['user', 'description']
 
 
 class PostOperationSerializer(serializers.Serializer):

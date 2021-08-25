@@ -1,6 +1,31 @@
-from rest_framework import serializers
-from django.contrib.auth import authenticate
 from . import models
+from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
+from django.contrib.auth import authenticate
+
+
+class UserAnalyticsSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=255)
+    date_format = "%Y-%m-%d"
+
+    def validate(self, attrs):
+        username = attrs['username']
+
+        try:
+            user = models.User.objects.get(username=username)
+        except models.User.DoesNotExist:
+            raise ValidationError(
+                'user with provided username does not exist',
+
+            )
+
+        last_login = user.last_login.strftime(self.date_format)
+        last_request = user.last_request.strftime(self.date_format)
+
+        return {
+            "last_login": last_login,
+            "last_request": last_request,
+        }
 
 
 class SignUpSerializer(serializers.ModelSerializer):

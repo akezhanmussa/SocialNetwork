@@ -21,6 +21,19 @@ class PostView(APIView):
         return Response(post_serializer.validated_data, status=status.HTTP_200_OK)
 
 
+class PostCreateView(APIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = serializers.PostCreateSerializer
+
+    def post(self, request):
+        post_create_data = request.data.get('post', None)
+        post_create_data['user'] = request.user.id
+        post_create_serializer = self.serializer_class(data=post_create_data)
+        post_create_serializer.is_valid(raise_exception=True)
+        post_create_serializer.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class PostOperationView(APIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = serializers.PostOperationSerializer

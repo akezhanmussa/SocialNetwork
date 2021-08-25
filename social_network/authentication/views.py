@@ -1,12 +1,12 @@
-from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
-from rest_framework.exceptions import ValidationError
-from rest_framework.response import Response
-from rest_framework import status
+import datetime
 from . import serializers
 from . import renderer
 from . import models
-import datetime
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
+from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
+from rest_framework import status
 
 
 class SignUpView(APIView):
@@ -52,3 +52,54 @@ class LoginView(APIView):
         user.last_login = datetime.datetime.now()
         user.save()
         return Response(user_serializer.data, status=status.HTTP_200_OK)
+
+
+class UserAnalyticsView(APIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = serializers.UserAnalyticsSerializer
+
+    def post(self, request):
+        user_data = request.data.get('user', None)
+        user_analytics_serializer = self.serializer_class(data=user_data)
+        user_analytics_serializer.is_valid(raise_exception=True)
+        return Response(user_analytics_serializer.validated_data, status=status.HTTP_200_OK)
+
+
+class UserListView(APIView):
+    permission_classes = (IsAdminUser,)
+    format = 'json'
+
+    def get(self, request):
+        number_of_users_str = request.query_params.get('number_of_users', 0)
+
+        try:
+            number_of_users = int(number_of_users_str)
+        except TypeError:
+            raise ValidationError(
+                'number_of_users must be of type int',
+            )
+
+        if number_of_users < 0:
+            raise ValidationError(
+                'number_of_users must be non negative',
+            )
+
+        # Include only non-admin users.
+        possible_users = models.User.objects.filter(is_staff=False).all()
+
+        if number_of_users > possible_users.count():
+            raise ValidationError(
+                'number_of_users exceeds an existing number of users in database',
+            )
+
+        users = possible_users[:number_of_users]
+        users_data = []
+
+        for user in users:
+
+            users_data.append({
+                'username': user.username,
+                "token": user.token,
+            })
+
+        return Response(data=users_data, status=status.HTTP_200_OK)
