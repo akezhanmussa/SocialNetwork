@@ -4,6 +4,7 @@ import requests
 import random
 import string
 import conf
+import copy
 
 
 class ClientException(Exception):
@@ -141,17 +142,17 @@ class Bot:
     def create_random_likes_on_posts(self):
         for user in self.users:
             for _ in range(self.config.bot.max_likes_per_user):
-                post_to_like = random.choice(self.posts)
-                self.client.like_post(user, post_to_like)
+                post_to_like = copy.deepcopy(random.choice(self.posts))
                 post_to_like['liked_by'] = user
+                self.client.like_post(user, post_to_like)
                 self.liked_posts.append(post_to_like)
 
     def create_random_unlikes_on_posts(self):
         for user in self.users:
             for _ in range(self.config.bot.max_likes_per_user):
-                post_to_unlike = random.choice(self.posts)
-                self.client.unlike_post(user, post_to_unlike)
+                post_to_unlike = copy.deepcopy(random.choice(self.posts))
                 post_to_unlike['unliked_by'] = user
+                self.client.unlike_post(user, post_to_unlike)
                 self.unliked_posts.append(post_to_unlike)
 
     def __enter__(self):
