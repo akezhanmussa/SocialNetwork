@@ -143,7 +143,7 @@ class Bot:
             for _ in range(self.config.bot.max_likes_per_user):
                 post_to_like = random.choice(self.posts)
                 self.client.like_post(user, post_to_like)
-                post_to_like['liked_by_now'] = user
+                post_to_like['liked_by'] = user
                 self.liked_posts.append(post_to_like)
 
     def create_random_unlikes_on_posts(self):
@@ -151,7 +151,7 @@ class Bot:
             for _ in range(self.config.bot.max_likes_per_user):
                 post_to_unlike = random.choice(self.posts)
                 self.client.unlike_post(user, post_to_unlike)
-                post_to_unlike['unliked_by_now'] = user
+                post_to_unlike['unliked_by'] = user
                 self.unliked_posts.append(post_to_unlike)
 
     def __enter__(self):
