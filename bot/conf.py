@@ -6,17 +6,26 @@ class ConfLoadException(Exception):
     """Raises on configuration load related errors."""
 
 
+class ServerConf(pydantic.BaseModel):
+    url: str
+
+
 class BotConf(pydantic.BaseModel):
     number_of_users: int
     max_posts_per_user: int
     max_likes_per_user: int
 
 
+class Conf(pydantic.BaseModel):
+    bot: BotConf
+    server: ServerConf
+
+
 def load(conf_path: str):
     try:
         with open(conf_path) as f:
             raw_conf = yaml.safe_load(f)
-            conf = BotConf(**raw_conf)
+            conf = Conf(**raw_conf)
             return conf
     except FileNotFoundError as e:
         raise ConfLoadException(

@@ -59,8 +59,7 @@ class UserAnalyticsView(APIView):
     serializer_class = serializers.UserAnalyticsSerializer
 
     def post(self, request):
-        user_data = request.data.get('user', None)
-        user_analytics_serializer = self.serializer_class(data=user_data)
+        user_analytics_serializer = self.serializer_class(data={"username": request.user.username})
         user_analytics_serializer.is_valid(raise_exception=True)
         return Response(user_analytics_serializer.validated_data, status=status.HTTP_200_OK)
 

@@ -19,8 +19,18 @@ class UserAnalyticsSerializer(serializers.Serializer):
 
             )
 
-        last_login = user.last_login.strftime(self.date_format)
-        last_request = user.last_request.strftime(self.date_format)
+        last_login = user.last_login
+        last_request = user.last_request
+
+        if last_login is None:
+            last_login = 'user did not log in yet',
+        else:
+            last_login = last_login.strftime(self.date_format)
+
+        if last_request is None:
+            last_request = 'user did not request any services yet',
+        else:
+            last_request = last_request.strftime(self.date_format)
 
         return {
             "last_login": last_login,

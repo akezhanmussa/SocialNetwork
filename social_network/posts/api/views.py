@@ -68,7 +68,8 @@ class PostOperationView(APIView):
 
         # Save time when the current user made the last request to the service.
         user.last_request = now
-        user.save()
+        user.save(update_fields=['last_request'])
+        # print(authentication.models.User.objects.filter(username=user.username).first().__dict__)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

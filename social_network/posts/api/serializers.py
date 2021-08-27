@@ -4,13 +4,8 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 
-class PostSerializer(serializers.ModelSerializer):
+class PostSerializer(serializers.Serializer):
     id = serializers.IntegerField()
-
-    class Meta:
-        model = models.Post
-        fields = ['id', 'description']
-        read_only_fields = ['description']
 
     def validate(self, attrs):
         post_id = attrs['id']
@@ -31,6 +26,7 @@ class PostCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Post
         fields = ['id', 'user', 'description']
+        read_only_fields = ['id']
 
 
 class PostOperationSerializer(serializers.Serializer):
