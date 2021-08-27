@@ -1,8 +1,8 @@
 import datetime
 import authentication.models
-from . import serializers
-from . import constants
-from . import models
+from posts.api import serializers
+from posts import constants
+from posts import models
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -27,11 +27,27 @@ class PostCreateView(APIView):
 
     def post(self, request):
         post_create_data = request.data.get('post', None)
+
+        if post_create_data is None:
+            raise ValidationError(
+                'post can not be empty for creation',
+            )
+
         post_create_data['user'] = request.user.id
         post_create_serializer = self.serializer_class(data=post_create_data)
         post_create_serializer.is_valid(raise_exception=True)
         post_create_serializer.save()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+
+        data = post_create_serializer.data
+        validated_data = post_create_serializer.validated_data
+        data['user'] = {
+            'username': validated_data['user'].username,
+        }
+
+        return Response(
+            data,
+            status=status.HTTP_200_OK,
+        )
 
 
 class PostOperationView(APIView):

@@ -1,4 +1,4 @@
-from . import models
+from authentication import models
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.contrib.auth import authenticate

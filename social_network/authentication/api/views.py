@@ -1,7 +1,7 @@
 import datetime
-from . import serializers
-from . import renderer
-from . import models
+from authentication.api import serializers
+from authentication import renderer
+from authentication import models
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.exceptions import ValidationError
@@ -26,7 +26,7 @@ class SignUpView(APIView):
         user_serializer.is_valid(raise_exception=True)
         user_serializer.save()
 
-        return Response(user_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(user_serializer.data, status=status.HTTP_200_OK)
 
 
 class LoginView(APIView):

@@ -1,5 +1,5 @@
-from . import models
-from . import constants
+from posts import models
+from posts import constants
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -30,7 +30,7 @@ class PostSerializer(serializers.ModelSerializer):
 class PostCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Post
-        fields = ['user', 'description']
+        fields = ['id', 'user', 'description']
 
 
 class PostOperationSerializer(serializers.Serializer):
