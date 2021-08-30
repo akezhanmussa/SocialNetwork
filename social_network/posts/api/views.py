@@ -53,23 +53,24 @@ class PostCreateView(APIView):
 class PostOperationView(APIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = serializers.PostOperationSerializer
+    date_format = "%Y-%m-%d"
 
     def post(self, request):
         user: authentication.models.User = request.user
         post_operation_serializer = self.serializer_class(data=request.data)
         post_operation_serializer.is_valid(raise_exception=True)
         post = post_operation_serializer.validated_data['post']
-        now = datetime.datetime.now()
+        now = datetime.datetime.now().strftime(self.date_format)
+        formatted_now = datetime.datetime.strptime(now, self.date_format)
 
         if post_operation_serializer.validated_data['operation'] == constants.PostOperation.LIKE:
-            post.likes.add(user, through_defaults={'date': now})
+            post.likes.add(user, through_defaults={'date': formatted_now})
         else:
             post.likes.remove(user)
 
         # Save time when the current user made the last request to the service.
-        user.last_request = now
+        user.last_request = formatted_now
         user.save(update_fields=['last_request'])
-        # print(authentication.models.User.objects.filter(username=user.username).first().__dict__)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -89,7 +90,7 @@ class PostAnalyticsView(APIView):
         try:
             date_from = datetime.datetime.strptime(date_from_str, self.date_format)
             date_to = datetime.datetime.strptime(date_to_str, self.date_format)
-            likes_num = models.PostLike.objects.filter(date__gte=date_from).filter(date__lte=date_to).count()
+            likes_num = models.PostLike.objects.filter(date__gte=date_from, date__lte=date_to).count()
             return Response(
                 {
                     'likes_num': likes_num,
